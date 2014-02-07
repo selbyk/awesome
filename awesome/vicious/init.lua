@@ -6,105 +6,87 @@
 --  * (c) 2009, Lucas de Vries <lucas@glacicle.com>
 ---------------------------------------------------
 
--- {{{ Grab environment
+-- {{{ Setup environment
 local type  = type
 local pairs = pairs
 local tonumber = tonumber
-local helpers  = require("vicious.helpers")
 local capi  = { timer = timer }
 local os    = { time = os.time }
 local table = {
     insert  = table.insert,
     remove  = table.remove
 }
--- }}}
 
-
--- {{{ Configure widgets
-require("vicious.cpu")
-require("vicious.cpuinf")
-require("vicious.cpufreq")
-require("vicious.thermal")
-require("vicious.uptime")
-require("vicious.bat")
-require("vicious.mem")
-require("vicious.fs")
-require("vicious.dio")
-require("vicious.hddtemp")
-require("vicious.net")
-require("vicious.wifi")
-require("vicious.mbox")
-require("vicious.mboxc")
-require("vicious.mdir")
-require("vicious.gmail")
-require("vicious.entropy")
-require("vicious.org")
-require("vicious.pkg")
-require("vicious.mpd")
-require("vicious.volume")
-require("vicious.weather")
-require("vicious.date")
--- }}}
+local helpers = require("vicious.helpers")
 
 -- Vicious: widgets for the awesome window manager
-module("vicious")
+local vicious = {}
+vicious.widgets = require("vicious.widgets")
+--vicious.contrib = require("vicious.contrib")
 
-
--- {{{ Initialise tables
+-- Initialize tables
 local timers       = {}
 local registered   = {}
 local widget_cache = {}
-
--- Initialise the function table
-widgets = {}
 -- }}}
 
--- {{{ Widget types
-for i, w in pairs(_M) do
-    -- Ensure we don't call ourselves
-    if w and w ~= _M and type(w) == "table" then
-        -- Ignore the function table and helpers
-        if i ~= "widgets" and i ~= "helpers" then
-            -- Place widgets in the namespace table
-            widgets[i] = w
+
+-- {{{ Local functions
+-- {{{ Update a widget
+local function update(widget, reg, disablecache)
+    -- Check if there are any equal widgets
+    if reg == nil then
+        for w, i in pairs(registered) do
+            if w == widget then
+                for _, r in pairs(i) do
+                    update(w, r, disablecache)
+                end
+            end
+        end
+
+        return
+    end
+
+    local t = os.time()
+    local data = {}
+
+    -- Check for chached output newer than the last update
+    if widget_cache[reg.wtype] ~= nil then
+        local c = widget_cache[reg.wtype]
+
+        if (c.time == nil or c.time <= t-reg.timer) or disablecache then
+            c.time, c.data = t, reg.wtype(reg.format, reg.warg)
+        end
+
+        data = c.data
+    else
+        data = reg.wtype and reg.wtype(reg.format, reg.warg)
+    end
+
+    if type(data) == "table" then
+        if type(reg.format) == "string" then
+            data = helpers.format(reg.format, data)
+        elseif type(reg.format) == "function" then
+            data = reg.format(widget, data)
         end
     end
-end
--- }}}
 
--- {{{ Main functions
--- {{{ Register a widget
-function register(widget, wtype, format, timer, warg)
-    local reg = {}
-    local widget = widget
-
-    -- Set properties
-    reg.type   = wtype
-    reg.format = format
-    reg.timer  = timer
-    reg.warg   = warg
-    reg.widget = widget
-
-    -- Update function
-    reg.update = function ()
-        update(widget, reg)
+    if widget.add_value ~= nil then
+        widget:add_value(tonumber(data) and tonumber(data)/100)
+    elseif widget.set_value ~= nil then
+        widget:set_value(tonumber(data) and tonumber(data)/100)
+    elseif widget.set_markup ~= nil then
+        widget:set_markup(data)
+    else
+        widget.text = data
     end
 
-    -- Default to 2s timer
-    if reg.timer == nil then
-        reg.timer = 2
-    end
-
-    -- Register a reg object
-    regregister(reg)
-
-    -- Return a reg object for reuse
-    return reg
+    return data
 end
 -- }}}
 
 -- {{{ Register from reg object
-function regregister(reg)
+local function regregister(reg)
     if not reg.running then
         if registered[reg.widget] == nil then
             registered[reg.widget] = {}
@@ -134,27 +116,68 @@ function regregister(reg)
 
         -- Start the timer
         if reg.timer > 0 then
-            timers[reg.update] = {
-                timer = capi.timer({ timeout = reg.timer })
-            }
-            timers[reg.update].timer:add_signal("timeout", reg.update)
-            timers[reg.update].timer:start()
+            local tm = timers[reg.timer] and timers[reg.timer].timer
+            tm = tm or capi.timer({ timeout = reg.timer })
+            if tm.connect_signal then
+                tm:connect_signal("timeout", reg.update)
+            else
+                tm:add_signal("timeout", reg.update)
+            end
+            if not timers[reg.timer] then
+                timers[reg.timer] = { timer = tm, refs = 1 }
+            else
+                timers[reg.timer].refs = timers[reg.timer].refs + 1
+            end
+            if not tm.started then
+                tm:start()
+            end
+            -- Initial update
+            reg.update()
         end
-
-        -- Initial update
-        reg.update()
         reg.running = true
     end
 end
 -- }}}
+-- }}}
+
+
+-- {{{ Global functions
+-- {{{ Register a widget
+function vicious.register(widget, wtype, format, timer, warg)
+    local widget = widget
+    local reg = {
+        -- Set properties
+        wtype  = wtype,
+        format = format,
+        timer  = timer,
+        warg   = warg,
+        widget = widget,
+    }
+    -- Set functions
+    reg.update = function ()
+        update(widget, reg)
+    end
+
+    -- Default to 2s timer
+    if reg.timer == nil then
+        reg.timer = 2
+    end
+
+    -- Register a reg object
+    regregister(reg)
+
+    -- Return a reg object for reuse
+    return reg
+end
+-- }}}
 
 -- {{{ Unregister a widget
-function unregister(widget, keep, reg)
+function vicious.unregister(widget, keep, reg)
     if reg == nil then
         for w, i in pairs(registered) do
             if w == widget then
                 for _, v in pairs(i) do
-                    reg = unregister(w, keep, v)
+                    reg = vicious.unregister(w, keep, v)
                 end
             end
         end
@@ -174,28 +197,60 @@ function unregister(widget, keep, reg)
         end
     end
 
-    -- Stop the timer
-    if timers[reg.update].timer.started then
-        timers[reg.update].timer:stop()
+    if not reg.running then
+        return reg
+    end
+
+    -- Disconnect from timer
+    local tm  = timers[reg.timer]
+    if tm.timer.disconnect_signal then
+        tm.timer:disconnect_signal("timeout", reg.update)
+    else
+        tm.timer:remove_signal("timeout", reg.update)
     end
     reg.running = false
+    -- Stop the timer
+    tm.refs = tm.refs - 1
+    if tm.refs == 0 and tm.timer.started then
+        tm.timer:stop()
+    end
 
     return reg
 end
 -- }}}
 
--- {{{ Suspend vicious
-function suspend()
-    for w, i in pairs(registered) do
-        for _, v in pairs(i) do
-            unregister(w, true, v)
+-- {{{ Enable caching of a widget type
+function vicious.cache(wtype)
+    if wtype ~= nil then
+        if widget_cache[wtype] == nil then
+            widget_cache[wtype] = {}
         end
     end
 end
 -- }}}
 
--- {{{ Activate vicious
-function activate(widget)
+-- {{{ Force update of widgets
+function vicious.force(wtable)
+    if type(wtable) == "table" then
+        for _, w in pairs(wtable) do
+            update(w, nil, true)
+        end
+    end
+end
+-- }}}
+
+-- {{{ Suspend all widgets
+function vicious.suspend()
+    for w, i in pairs(registered) do
+        for _, v in pairs(i) do
+            vicious.unregister(w, true, v)
+        end
+    end
+end
+-- }}}
+
+-- {{{ Activate a widget
+function vicious.activate(widget)
     for w, i in pairs(registered) do
         if widget == nil or w == widget then
             for _, v in pairs(i) do
@@ -206,63 +261,6 @@ function activate(widget)
 end
 -- }}}
 
--- {{{ Enable caching for a widget
-function enable_caching(widget)
-    if widget_cache[widget] == nil then
-        widget_cache[widget] = {}
-    end
-end
--- }}}
+return vicious
 
--- {{{ Update a widget
-function update(widget, reg, disablecache)
-    -- Check if there are any equal widgets
-    if reg == nil then
-        for w, i in pairs(registered) do
-            if w == widget then
-                for _, v in pairs(i) do
-                    update(w, v, disablecache)
-                end
-            end
-        end
-
-        return
-    end
-
-    local t = os.time()
-    local data = {}
-
-    -- Do we have output chached for a widget newer than last update
-    if widget_cache[reg.type] ~= nil then
-        local c = widget_cache[reg.type]
-
-        if c.time == nil or c.time <= t - reg.timer or disablecache then
-            c.time = t
-            c.data = reg.type(reg.format, reg.warg)
-        end
-
-        data = c.data
-    else
-        data = reg.type(reg.format, reg.warg)
-    end
-
-    if type(data) == "table" then
-        if type(reg.format) == "string" then
-            data = helpers.format(reg.format, data)
-        elseif type(reg.format) == "function" then
-            data = reg.format(widget, data)
-        end
-    end
-
-    if widget.add_value ~= nil then
-        widget:add_value(tonumber(data) / 100)
-    elseif widget.set_value ~= nil then
-        widget:set_value(tonumber(data) / 100)
-    else
-        widget.text = data
-    end
-
-    return data
-end
--- }}}
 -- }}}
