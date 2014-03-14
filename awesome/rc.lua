@@ -53,7 +53,7 @@ themes_dir = (config_dir .. "/themes/powerarrowf")
 beautiful.init(themes_dir .. "/theme.lua")
 
 -- This is used later as the default terminal, browser and editor to run.
-terminal = "termite"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 browser = "chromium"
@@ -696,13 +696,16 @@ function run_once(cmd)
 end
 
 -- {{ I need redshift to save my eyes }} -
-run_once("redshift -l 49.26:-123.23")
-awful.util.spawn_with_shell("xmodmap ~/.speedswapper")
+--run_once("redshift -l 49.26:-123.23")
+--awful.util.spawn_with_shell("xmodmap ~/.speedswapper")
 
 -- {{ Turns off the terminal bell }} --
 awful.util.spawn_with_shell("/usr/bin/xset b off")
-run_once("krunner")
+
 run_once("compton")
+run_once("krunner")
+run_once("nm-applet --sm-disable &")
+
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
