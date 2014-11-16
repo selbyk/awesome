@@ -7,7 +7,7 @@ Getting up on *buntu:
 
 1. `sudo apt-get install awesome-desktop`
 2. `git clone git@github.com:selbyk/awesome.git`
-3. `cp -r ./awesome ~/.config`
+3. `cp -r ./awesome/awesome ~/.config`
 4. `sudo reboot`
 
 A lot of the fancier features require further install, like compton & xredshift but Ubuntu has all of them in their repositories.  If you like my terminal colors, you might want to check out my [dotfiles](https://github.com/selbyk/dotfiles).
