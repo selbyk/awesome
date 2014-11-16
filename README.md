@@ -13,9 +13,11 @@ Getting up on *buntu:
 
 [rc.lua](https://github.com/selbyk/awesome/blob/master/awesome/rc.lua) is the brains of awesome, and [here](http://tylerneylon.com/a/learn-lua/) is a good tutorial on the basics you need to get started with Lua.
 
-A lot of the fancier features require further install, like compton for compositing (translucency that doesn't suck) & xredshift (tints the screen in a red hue so your eyes don't burn out) and some KDE stuff, so you'll need to comment them out in the autorun section I have at the bottom of rc.lia.
+A lot of the fancier features require further install, like compton for compositing (translucency that doesn't suck) & xredshift (tints the screen in a red hue so your eyes don't burn out) and some KDE stuff, so you'll need to comment them out in the autorun section I have at the bottom of rc.lua.
 
 Ubuntu has packages for all of the programs in that section, adjust for taste.  If you like my terminal colors, you might want to check out my [dotfiles](https://github.com/selbyk/dotfiles).
+
+The original theme is forked, but it was so long ago I don't remember where it is from.  If anyone knows, create an issue.  Thanks.  ^.^
 
 uxvrt
 ![](http://i.imgur.com/6BzAXHk.jpg)
