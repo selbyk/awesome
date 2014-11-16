@@ -1,10 +1,25 @@
 awesome
 =======
 
-My awesome config
+My awesome config.  I'm not a minimalist, I just think tiling window mangers narrow my focus and make me more productive.  I always install awesome on top of a full install of KDE.
 
-![](https://lh6.googleusercontent.com/-E18CxCneoEE/Uc6GnFdZX6I/AAAAAAAAAUE/pSEOd3Rr5c8/w1488-h930-no/shell.png)
-![](https://lh4.googleusercontent.com/-0rgfqvcXXSs/Uc6GhfESHeI/AAAAAAAAAT0/yZfHAyzMnV4/w1488-h930-no/web.png)
-![](https://lh3.googleusercontent.com/-znFOeVJl-BA/Uc6GrJOUhFI/AAAAAAAAAUM/CHoKYXcwrR8/w1488-h930-no/editor.png)
-![](https://lh4.googleusercontent.com/-zeN2xd2FFq0/Uc6GtpSTB_I/AAAAAAAAAUU/ErI_7ho4a7Y/w1488-h930-no/chat.png)
-![](https://lh4.googleusercontent.com/-pquAHQW6vCQ/Uc6HQiFduMI/AAAAAAAAAVU/u1z89D3P5es/w1488-h930-no/windows.png)
+Getting up on *buntu:
+1. `sudo apt-get install awesome-desktop`
+2. `git clone git@github.com:selbyk/awesome.git`
+3. `cp -r ./awesome ~/.config`
+4. `sudo reboot`
+
+A lot of the fancier features require further install, like compton & xredshift but Ubuntu has all of them in their repositories.  If you like my terminal colors, you might want to check out my [dotfiles](https://github.com/selbyk/dotfiles).
+
+uxvrt
+![](http://i.imgur.com/6BzAXHk.jpg)
+dolphin
+![](http://i.imgur.com/cGZyFAc.png)
+firefox
+![](http://i.imgur.com/px63cTS.png)
+atom
+![](http://i.imgur.com/aITH1VC.png)
+hipchat/konversation
+![](http://i.imgur.com/X108FMA.png)
+spotify
+![](http://i.imgur.com/tyEXFfW.png)
