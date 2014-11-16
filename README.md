@@ -10,6 +10,9 @@ Getting up on *buntu:
 3. `cp -r ./awesome/awesome ~/.config`
 4. `sudo reboot`
 
+
+[rc.lua](https://github.com/selbyk/awesome/blob/master/awesome/rc.lua) is the brains of awesome, and [here](http://tylerneylon.com/a/learn-lua/) is a good tutorial on the basics you need to get started with Lua.
+
 A lot of the fancier features require further install, like compton & xredshift but Ubuntu has all of them in their repositories.  If you like my terminal colors, you might want to check out my [dotfiles](https://github.com/selbyk/dotfiles).
 
 uxvrt
