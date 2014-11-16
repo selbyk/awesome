@@ -4,6 +4,7 @@ awesome
 My awesome config.  I'm not a minimalist, I just think tiling window mangers narrow my focus and make me more productive.  I always install awesome on top of a full install of KDE.
 
 Getting up on *buntu:
+
 1. `sudo apt-get install awesome-desktop`
 2. `git clone git@github.com:selbyk/awesome.git`
 3. `cp -r ./awesome ~/.config`
