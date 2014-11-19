@@ -1,7 +1,9 @@
-awesome
+awesomewm
 =======
 
 My awesome config.  I'm not a minimalist, I just think tiling window mangers narrow my focus and make me more productive.  I always install awesome on top of a full install of [KDE](https://www.kde.org/screenshots/).
+
+If you're new to tiling window managers, Arch Linux as a cool [Comparison of Tiling Window Managers](https://wiki.archlinux.org/index.php/Comparison_of_Tiling_Window_Managers).
 
 Getting up on *buntu:
 
